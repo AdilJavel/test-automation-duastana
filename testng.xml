@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="All Test Suite">
+    <test verbose="2" preserve-order="true" name="C:/Users/Javel/Desktop/test-automation-duastana">
+        <classes>
+            <class name="com.solotesting.duastana.MainTesting">
+                <methods>
+                    <include name="logIn"/>
+                    <include name="logInWithId"/>
+                    <include name="testProfilePage"/>
+                    <include name="testCurTable"/>
+                    <include name="testTeacherTab"/>
+                    <include name="testTranscriptTab"/>
+                    <include name="testDiseaseTab"/>
+                    <include name="testCertificateTab"/>
+                    <include name="testSwitcher"/>
+                    <include name="testLogoutTab"/>
+                    <include name="testLogout"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
