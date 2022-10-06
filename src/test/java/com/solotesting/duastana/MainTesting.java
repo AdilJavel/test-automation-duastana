@@ -11,6 +11,11 @@ import com.solotesting.duastana.pages.MainPage;
 import com.solotesting.duastana.util.*;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -22,23 +27,30 @@ import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Properties;
 import static com.solotesting.duastana.constants.NameConstants.*;
 
 public class MainTesting {
+
     DriverSettings driverSettings = new DriverSettings();
-    PropertiesReader propertiesReader = ConfigFactory.create(PropertiesReader.class);
     public static ExtentReports extent;
     public static ExtentHtmlReporter htmlReporter;
     public static ExtentTest extentTest;
-
     private static Properties properties = PropertiesUtil.getInstance().getProperties();
     private static ActionsUtil actionsUtil = ActionsUtil.getInstance();
     private static WebDriverWaitUtil webDriverWaitUtil = WebDriverWaitUtil.getInstance();
     private WebDriver webDriver;
+    static ExcelUtil excel = new ExcelUtil();
+    static String excelFilePath ="C:\\Users\\Javel\\Desktop\\Testing\\test-automation-duastana\\src\\test\\resources\\testdata\\ExTest.xlsx";
+
 
     @BeforeTest
     public void setUp() {
+        excel.setExcelRow(0);
         htmlReporter = new ExtentHtmlReporter(System.getProperty("user.dir")+"/Reports/extentReport.html");
 
         extent = new ExtentReports();
@@ -50,14 +62,19 @@ public class MainTesting {
     }
 
     @AfterMethod
-    public void getResult(ITestResult result) {
+    public void getResult(ITestResult result) throws Exception {
+        int col = excel.getExcelCol();
+        int row = excel.getExcelRow();
         if(result.getStatus()==ITestResult.FAILURE) {
             extentTest.log(Status.FAIL, result.getTestName());
+            excel.setCellValue(row,col,"FAILURE", excelFilePath);
         } else if(result.getStatus() == ITestResult.SUCCESS) {
             extentTest.log(Status.PASS, result.getTestName());
+            excel.setCellValue(row,col,"PASSED", excelFilePath);
         }
         else {
             extentTest.log(Status.SKIP, result.getTestName());
+            excel.setCellValue(row,col,"SKIPPED", excelFilePath);
         }
     }
     @AfterTest
@@ -65,6 +82,17 @@ public class MainTesting {
         //to write or update test information to reporter
         extent.flush();
     }
+
+    @BeforeMethod
+    public void dataDrivenTesting() throws Exception {
+        excel.setExcelFile(excelFilePath);
+        excel.incExcelRow();
+        int i = excel.getExcelRow();
+        excel.setExcelCol(4);
+
+    }
+
+
 
 
         //Test001
@@ -78,7 +106,6 @@ public class MainTesting {
         loginPage.getPasswordElement().sendKeys(properties.getProperty(TEST_VALUES));
         loginPage.getEnterButton().click();
         extentTest = extent.createTest("Test");
-
         Assert.assertEquals(webDriver.getCurrentUrl(), "https://du.astanait.edu.kz");
     }
     //Test002
