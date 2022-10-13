@@ -83,15 +83,11 @@ public class ExcelUtil {
 
     }
 
-    public String getCellData(int rowNumber,int columnNumber){
+    public String getCellData(int rowNumber,int columnNumber, String excelFilePath) throws Exception {
+        inStream = new FileInputStream(excelFilePath);
+        workbook = WorkbookFactory.create(inStream);
         worksheet = workbook.getSheetAt(0);
-        if (cell==null) return null;
-        else
-        cell =worksheet.getRow(rowNumber).getCell(columnNumber);
-        if (cell==null) {
-            return "NULL";
-        }else
-        return cell.getStringCellValue();
+        return worksheet.getRow(rowNumber).getCell(columnNumber).toString();
     }
 
     public int getRowCountInSheet(){
@@ -124,41 +120,7 @@ public class ExcelUtil {
 
     }
 
-    public void callTestMethod(String testName) {
-        if(testName=="TC001") {
-            testCases.logIn();
-        }
-        if(testName=="TC002") {
-            testCases.logInWithId();
-        }
-        if(testName=="TC003") {
-            testCases.testProfilePage();
-        }
-        if(testName=="TC004") {
-            testCases.testCurTable();
-        }
-        if(testName=="TC005") {
-            testCases.testTeacherTab();
-        }
-        if(testName=="TC006") {
-            testCases.testTranscriptTab();
-        }
-        if(testName=="TC007") {
-            testCases.testDiseaseTab();
-        }
-        if(testName=="TC008") {
-            testCases.testCertificateTab();
-        }
-        if(testName=="TC009") {
-            testCases.testLogout();
-        }
-        if(testName=="TC010") {
-            testCases.testLogoutTab();
-        }
-        if(testName=="TC011") {
-            testCases.testSwitcher();
-        }
 
-    }
+
 
 }

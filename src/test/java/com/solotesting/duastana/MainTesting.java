@@ -25,12 +25,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import static com.solotesting.duastana.constants.NameConstants.*;
 
@@ -48,8 +51,11 @@ public class MainTesting {
     static String excelFilePath ="C:\\Users\\Javel\\Desktop\\Testing\\test-automation-duastana\\src\\test\\resources\\testdata\\ExTest.xlsx";
 
 
+
+
     @BeforeTest
-    public void setUp() {
+    public void setUp() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        DBUtils.createConnection();
         excel.setExcelRow(0);
         htmlReporter = new ExtentHtmlReporter(System.getProperty("user.dir")+"/Reports/extentReport.html");
 
@@ -60,6 +66,7 @@ public class MainTesting {
         htmlReporter.config().setReportName("report");
         htmlReporter.config().setTheme(Theme.DARK);
     }
+
 
     @AfterMethod
     public void getResult(ITestResult result) throws Exception {
@@ -81,6 +88,7 @@ public class MainTesting {
     public void tearDown() {
         //to write or update test information to reporter
         extent.flush();
+        DBUtils.destroy();
     }
 
     @BeforeMethod
@@ -89,15 +97,20 @@ public class MainTesting {
         excel.incExcelRow();
         int i = excel.getExcelRow();
         excel.setExcelCol(4);
-
+//        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
     }
-
-
-
+//    @Test
+//    public void data() throws Exception {
+//        excel.setExcelFile(excelFilePath);
+//        System.out.println(excel.getCellData(3,3,excelFilePath));
+//        String a = (excel.getCellData(3,3,excelFilePath));
+//        if (a.equals("N")) System.out.println("A");
+//    }
 
         //Test001
     @Test(groups = {"simpleLogin", "dropGroup"})
-    public void logIn() {
+    public void logIn() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         driverSettings.initDriver();
         webDriver = driverSettings.getDriver();
         webDriver.navigate().to(properties.getProperty(WWW_DU_ASTANA_LOGIN_KZ));
@@ -111,7 +124,8 @@ public class MainTesting {
     //Test002
     @Test(groups = {"loginWithId"})
 
-    public void logInWithId() {
+    public void logInWithId() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
 //        driverSettings.initDriver();
         webDriver = driverSettings.getDriver();
         webDriver.navigate().to(properties.getProperty(WWW_DU_ASTANA_LOGIN_KZ));
@@ -119,9 +133,10 @@ public class MainTesting {
         WebDriverWait wait = new WebDriverWait(webDriver, 10); // seconds
         loginPage.getLoginIdElement().click();//redirects to outlook
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.name(properties.getProperty(OUTLOOK_LOGIN_NAME))));
-        loginPage.getUsernameIdElement().sendKeys(properties.getProperty(LOGIN_VALUE), Keys.ENTER);
+        String usernamedata = DBUtils.getColumnValue("Select * from users_table", "username");
+        loginPage.getUsernameIdElement().sendKeys(usernamedata.substring(0,usernamedata.length()-1), Keys.ENTER);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.name(properties.getProperty(OUTLOOK_PASS_NAME))));
-        loginPage.getPasswordIdElement().sendKeys(properties.getProperty(PASS_VALUE), Keys.ENTER);
+        loginPage.getPasswordIdElement().sendKeys(DBUtils.getColumnValue("Select * from users_table", "password"), Keys.ENTER);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(properties.getProperty(OUTLOOK_BUTTON_XPATH))));
         loginPage.getEnterIdButton().click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(properties.getProperty(MAIN_PAGE_COL_XPATH))));
@@ -139,9 +154,9 @@ public class MainTesting {
     }
 
     //Test003
-    @BeforeGroups("profilePage")
     @Test (groups = {"mainPage", "dropGroup"})
-    public void testProfilePage() {
+    public void testProfilePage() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10); // seconds
         MainPage mainPage = MainPage.getInstance(webDriver);
@@ -152,10 +167,13 @@ public class MainTesting {
 
     //Test004
     @Test (groups = {"mainPage", "profilePage", "dropGroup"})
-    public void testCurTable() {
+    public void testCurTable() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver,10); //seconds
         MainPage mainPage = MainPage.getInstance(webDriver);
+        mainPage.getProfileButton().click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(properties.getProperty(CUR_TABLE_XPATH))));
         mainPage.getCurTableButton().click();
         extentTest = extent.createTest("Test");
         Assert.assertTrue(webDriver.findElement(By.xpath(properties.getProperty(CUR_TABLE_CON_XPATH))).isDisplayed());
@@ -163,7 +181,8 @@ public class MainTesting {
 
     //Test005
     @Test(groups = {"mainPage", "dropGroup"})
-    public void testTeacherTab() {
+    public void testTeacherTab() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         MainPage mainpage = MainPage.getInstance(webDriver);
@@ -175,7 +194,8 @@ public class MainTesting {
 
     //Test006
     @Test(groups = {"mainPage", "dropGroup"})
-    public void testTranscriptTab() {
+    public void testTranscriptTab() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         MainPage mainpage = MainPage.getInstance(webDriver);
@@ -187,7 +207,8 @@ public class MainTesting {
 
     //Test007
     @Test(groups = {"mainPage", "dropGroup"})
-    public void testDiseaseTab() {
+    public void testDiseaseTab() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         MainPage mainpage = MainPage.getInstance(webDriver);
@@ -199,7 +220,8 @@ public class MainTesting {
 
     //Test008
     @Test(groups = {"mainPage", "dropGroup"})
-    public void testCertificateTab() {
+    public void testCertificateTab() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         MainPage mainpage = MainPage.getInstance(webDriver);
@@ -210,7 +232,8 @@ public class MainTesting {
     }
     //Test009
     @Test(groups = {"mainPage", "dropGroup"})
-    public void testLogoutTab() {
+    public void testLogoutTab() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10);
         MainPage mainpage = MainPage.getInstance(webDriver);
@@ -222,7 +245,8 @@ public class MainTesting {
 
     //Test010
     @Test (groups = {"mainPage", "dropGroup", "logoutGroup"})
-    public void testLogout() {
+    public void testLogout() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10); // seconds
         MainPage mainPage = MainPage.getInstance(webDriver);
@@ -234,7 +258,8 @@ public class MainTesting {
 
     //Test011
     @Test (groups = {"mainPage", "dropGroup"})
-    public void testSwitcher() {
+    public void testSwitcher() throws Exception {
+        if(excel.getCellData(excel.getExcelRow(),3,excelFilePath).equals("N")) throw new SkipException("SKIP");
         webDriver = driverSettings.getDriver();
         WebDriverWait wait = new WebDriverWait(webDriver, 10); // seconds
         MainPage mainPage = MainPage.getInstance(webDriver);
